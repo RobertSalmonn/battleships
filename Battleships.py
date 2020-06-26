@@ -8,8 +8,8 @@ wn.setup(width=800, height=400)
 
 
 def board_setup():
-    global in_game
-    in_game=False
+    global board    
+
     arr=[2, 3, 4, 4, 5]
     board=[[0,0,0,0,0,0,0,0,0,0],
            [0,0,0,0,0,0,0,0,0,0],
@@ -24,7 +24,10 @@ def board_setup():
     ship_counter=0
     counter=0
 
+
+       
     while ship_counter!=5:
+        ok=True
         direction_num=random.randint(1, 2)
         if direction_num==1:
             column=random.randint(0, 9)
@@ -36,30 +39,57 @@ def board_setup():
         for i in range(arr[counter]):
             if direction_num==1:
                 if board[column][row+i]==0:
-                    board[column][row+i]=arr[counter]
+                    pass
                 else:
                     ship_counter-=1
                     counter-=1
+                    ok=False
                     break
 
 
             else:
                 if board[column+i][row]==0:
-                    board[column+i][row]=arr[counter]
+                    pass
                 else:
                     ship_counter-=1
                     counter-=1
+                    ok=False
                     break
+
+
+        if ok==True and direction_num==1:
+            for i in range (arr[counter]):
+                board[column][row+i]=arr[counter]
+
+        elif ok==True and direction_num==2:
+            for i in range (arr[counter]):
+                board[column+i][row]=arr[counter]
+            
+                
+            
         counter+=1
         ship_counter+=1
-        for i in board:
-            print (i)
-        print ("")
-
     for i in board:
         print (i)
-            
+
+    
+                
+                
+                    
+
 board_setup()
+
+
+
+
+
+
+
+
+
+
+
+
 
 k=0
 colors=["red", "green", "blue", "orange", "purple"]
@@ -140,9 +170,21 @@ for i in range (10):
 grid.forward(400)
 
 def p(x, y):
+##    global board
     ok_positions=True
-    global in_game
-    in_game=True
+
+    p_board=[[0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0]]
+
+
     
     for ship in ships_o:
         x=ship.xcor()+20
@@ -150,7 +192,7 @@ def p(x, y):
         y=ship.ycor()+20
         y=(int(round(y/40.0)*40)-20)
         ship.goto(x, y)
-        print (ship.shapesize()[0])#
+
         
     for ship in ships_e:
         x=ship.xcor()+20
@@ -158,25 +200,92 @@ def p(x, y):
         y=ship.ycor()
         y=(int(round(y/40.0)*40))
         ship.goto(x, y)
-        print (ship.shapesize()[0])#
-    
-    checkbox.goto(1000, 1000)
-    for ship in ships_e:
-        ship.stamp()
-        ship.goto(1000, 1000)
+        
+#
     for ship in ships_o:
-        ship.stamp()
-        ship.goto(1000, 1000)
+        x=ship.xcor()
+        column=round((x-20+400)/40)
+        y=ship.ycor()
+        row=round(((y*-1)-20+200)/40)
+        try:
+            p_board[row][column]=int((ship.shapesize()[0])/2)   #
+        except IndexError:
+            ok_positions=False
+            break
+        height=(ship.shapesize()[0])
+        height=int(((height/2)-1)/2)
+        for i in range (1, height+1):
+            try:
+                p_board[row+i][column]=int((ship.shapesize()[0])/2) 
+            except IndexError:
+                ok_positions=False
+                break
+        for i in range (1, height+1):
+            p_board[row-i][column]=int((ship.shapesize()[0])/2) 
+            if row-i<0 or column<0:
+                ok_positions=False
 
 
-if in_game==False:
-    wn.listen()
-    ship5.ondrag(ship5.goto)
-    ship4.ondrag(ship4.goto)
-    ship3.ondrag(ship3.goto)
-    ship2.ondrag(ship2.goto)
-    ship1.ondrag(ship1.goto)
-    checkbox.onclick(p)
+    for ship in ships_e:
+        height=(ship.shapesize()[0])
+        height=((height/4)-1)*40
+        x=ship.xcor()
+        column=round((x-20+400)/40)
+        y=ship.ycor()
+        row=round(((y*-1)+200+height)/40)
+        print (x, y)
+        try:
+            p_board[row][column]=int((ship.shapesize()[0])/2)
+        except IndexError:
+            ok_positions=False
+            break
+
+        for i in range (int((ship.shapesize()[0])/2)):
+            p_board[row-i][column]=int((ship.shapesize()[0])/2)
+            if row-i<0 or column<0:
+                ok_positions=False
+        
+        
+            
+        
+        
+        
+    for i in p_board:
+        print (i)
+
+    
+    if ok_positions==True:
+        checkbox.goto(1000, 1000)
+        for ship in ships_e:
+            ship.stamp()
+            ship.goto(1000, 1000)
+        for ship in ships_o:
+            ship.stamp()
+            ship.goto(1000, 1000)
+    else:
+        p_board=[[0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0]]
+    print (ok_positions)
+        
+        
+
+
+
+wn.listen()
+ship5.ondrag(ship5.goto)
+ship4.ondrag(ship4.goto)
+ship3.ondrag(ship3.goto)
+ship2.ondrag(ship2.goto)
+ship1.ondrag(ship1.goto)
+checkbox.onclick(p)
 
 
         
