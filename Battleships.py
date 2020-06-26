@@ -5,7 +5,18 @@ wn=turtle.Screen()
 wn.tracer(0)
 wn.setup(width=800, height=400)
 
+game_over=False
 
+class Pen (turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.penup()
+        self.shape("triangle")
+        self.color("black")
+        self.speed(0)
+        self.hideturtle()
+
+pen=Pen()
 
 def board_setup():
     global board    
@@ -92,7 +103,7 @@ board_setup()
 
 
 k=0
-colors=["red", "green", "blue", "orange", "purple"]
+colors=["pink", "green", "blue", "orange", "purple"]
 class Ship (turtle.Turtle):
     def __init__(self):
         global k
@@ -169,8 +180,30 @@ for i in range (10):
     grid.right(90)
 grid.forward(400)
 
+
+class Hit (turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.penup()
+        self.shape("circle")
+        self.color("red")
+        self.speed(0)
+
+class Miss (turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.penup()
+        self.shape("circle")
+        self.color("grey")
+        self.speed(0)
+
+        
+
+
+ok_positions=False
 def p(x, y):
-##    global board
+    global ok_positions
+    global p_board
     ok_positions=True
 
     p_board=[[0,0,0,0,0,0,0,0,0,0],
@@ -208,7 +241,9 @@ def p(x, y):
         y=ship.ycor()
         row=round(((y*-1)-20+200)/40)
         try:
-            p_board[row][column]=int((ship.shapesize()[0])/2)   #
+            if p_board[row][column]!=0:
+                ok_positions=False
+            p_board[row][column]+=1
         except IndexError:
             ok_positions=False
             break
@@ -216,12 +251,16 @@ def p(x, y):
         height=int(((height/2)-1)/2)
         for i in range (1, height+1):
             try:
-                p_board[row+i][column]=int((ship.shapesize()[0])/2) 
+                if p_board[row+i][column]!=0:
+                    ok_positions=False
+                p_board[row+i][column]+=1 
             except IndexError:
                 ok_positions=False
                 break
         for i in range (1, height+1):
-            p_board[row-i][column]=int((ship.shapesize()[0])/2) 
+            if p_board[row-i][column]!=0:
+                ok_positions=False
+            p_board[row-i][column]+=1 
             if row-i<0 or column<0:
                 ok_positions=False
 
@@ -233,23 +272,18 @@ def p(x, y):
         column=round((x-20+400)/40)
         y=ship.ycor()
         row=round(((y*-1)+200+height)/40)
-        print (x, y)
-        try:
-            p_board[row][column]=int((ship.shapesize()[0])/2)
-        except IndexError:
-            ok_positions=False
-            break
-
+        
         for i in range (int((ship.shapesize()[0])/2)):
-            p_board[row-i][column]=int((ship.shapesize()[0])/2)
+            try:
+                if p_board[row-i][column]!=0:
+                    ok_positions=False
+                p_board[row-i][column]+=1
+            except IndexError:
+                ok_positions=False
             if row-i<0 or column<0:
                 ok_positions=False
         
-        
-            
-        
-        
-        
+    print ("")
     for i in p_board:
         print (i)
 
@@ -273,10 +307,121 @@ def p(x, y):
                [0,0,0,0,0,0,0,0,0,0],
                [0,0,0,0,0,0,0,0,0,0],
                [0,0,0,0,0,0,0,0,0,0]]
-    print (ok_positions)
-        
+    
         
 
+def check(x, y):
+    global game_over
+    global ok_positions
+    if ok_positions==True and game_over==False:
+        row=round((x-20)/40)
+        column=round(((y*-1)+180)/40)
+       
+        place(column, row)
+
+    else:
+        pass
+
+c_board=[[0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0]]
+
+pc_board=[[0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0]]
+def place(c, r):
+    c_pos=True
+    go=True
+    if c>9 or r>9 or c<0 or r<0:
+        go=False
+    cc=((c*-40)+180)
+    rr=((r*40)+20)
+    if go==True:
+
+        if c_board[c][r]==1:
+            c_pos=False
+            pass
+            
+            
+        
+        c_board[c][r]=1
+        if board[c][r]!=0:
+            hit=Hit()
+            hit.goto(rr, cc)
+
+        else:
+            miss=Miss()
+            miss.goto(rr, cc)
+        win=True
+        for i in range (10):
+            for j in range (10):
+                if board[i][j]!=0 and c_board[i][j]==0:
+                    win=False
+        print (c_pos)
+        if win==True:
+            winner()
+
+        elif c_pos==False:
+            pass
+            
+        else:
+            
+            op_move()
+                
+    else:
+        pass
+
+def op_move():
+    valid=False
+    while valid==False:
+        rows=random.randint(0, 9)
+        columns=random.randint(0, 9)
+        if pc_board[columns][rows]==1:
+            valid=False
+        else:
+            valid=True
+    print (rows, columns)
+    col=((columns*-40)+180)
+    roww=((rows*40)+20-400)
+    print (roww, col)
+    pc_board[columns][rows]=1
+    if p_board[columns][rows]!=0:
+        hit=Hit()
+        hit.goto(roww, col)
+        
+    else:
+        miss=Miss()
+        miss.goto(roww, col)
+    for i in pc_board:
+        print (i)
+        
+
+
+    
+    
+        
+
+def winner():
+    global game_over
+    game_over=True
+    pen.goto(0, 0)
+    pen.write(f"YOU WIN!", align="center", font=("Calibri", 80))
+    
+    
 
 
 wn.listen()
@@ -286,8 +431,7 @@ ship3.ondrag(ship3.goto)
 ship2.ondrag(ship2.goto)
 ship1.ondrag(ship1.goto)
 checkbox.onclick(p)
-
-
+wn.onscreenclick(check)
         
 while True:
     wn.update()
